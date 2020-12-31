@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+
+    "jsx": "preserve",
+    "module": "es2020",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "target": "es2019"
+  },
+  "exclude": ["node_modules"]
+}
