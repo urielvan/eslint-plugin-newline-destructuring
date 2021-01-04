@@ -7,6 +7,24 @@
     "dev": "jest --watch --onlyChanged",
     "test": "jest"
   },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "eslintplugin",
+    "lint",
+    "destructuring"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/urielvan/eslint-plugin-newline-destructuring.git"
+  },
+  "directories": {
+    "lib": "dist",
+    "test": "test"
+  },
   "devDependencies": {
     "@types/eslint": "^7.2.6",
     "@types/estree": "^0.0.45",
