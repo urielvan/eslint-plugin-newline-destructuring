@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "esModuleInterop": true,
-    "module": "es2020",
+    "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "dist",
     "paths": {
@@ -12,8 +12,9 @@
     },
     "strict": true,
     "strictPropertyInitialization": false,
+    "target": "es5"
   },
-  "exclude": [
-    "node_modules"
+  "include": [
+    "src"
   ]
 }
