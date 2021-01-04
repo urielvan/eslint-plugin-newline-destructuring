@@ -58,16 +58,16 @@ function getPropertyString(
     return originalText;
   }
 
-  const name = key.type === 'Identifier'
+  let valueString = key.type === 'Identifier'
     ? key.name
     : key.raw ?? '';
 
-  if (item.shorthand) {
-    return name + endString;
-  }
-
   if (value.type === 'Identifier') {
-    return `${name}: ${value.name}${endString}`;
+    if (item.shorthand) {
+      return valueString + endString;
+    }
+
+    return `${valueString}: ${value.name}${endString}`;
   }
 
   if (
@@ -81,7 +81,9 @@ function getPropertyString(
     return originalText;
   }
 
-  let valueString = value.left.name;
+  if (!item.shorthand) {
+    valueString += `: ${value.left.name}`;
+  }
 
   valueString += ' = ';
 
@@ -93,7 +95,7 @@ function getPropertyString(
     valueString += source.getText(value.right);
   }
 
-  return `${name}: ${valueString}${endString}`;
+  return valueString + endString;
 }
 
 function getFixer(source: SourceCode, node: Node, multiLine = true) {

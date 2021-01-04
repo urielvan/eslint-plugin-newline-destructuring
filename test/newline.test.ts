@@ -73,6 +73,21 @@ runner.run('default options', newline, {
       errors: [{ messageId: MUST_NOT_SPLIT }],
       output: "const {'foo': xx,'bar': yy} = foo;",
     },
+    {
+      code: 'const { a: aliasA,\nb } = foo;',
+      errors: [{ messageId: MUST_NOT_SPLIT }],
+      output: 'const {a: aliasA,b} = foo;',
+    },
+    {
+      code: 'const { a = defaultA,\nb } = foo;',
+      errors: [{ messageId: MUST_NOT_SPLIT }],
+      output: 'const {a = defaultA,b} = foo;',
+    },
+    {
+      code: 'const { a: aliasA = defaultA,\nb } = foo;',
+      errors: [{ messageId: MUST_NOT_SPLIT }],
+      output: 'const {a: aliasA = defaultA,b} = foo;',
+    },
   ],
   valid: [
     // shorthand
