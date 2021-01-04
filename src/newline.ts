@@ -24,6 +24,7 @@ export const MUST_NOT_SPLIT = 'mustNotSplit';
 export const MUST_SPLIT_TOO_LONG = 'mustSplitTooLong';
 export const NO_BLANK_BETWEEN = 'noBlankBetween';
 export const CONSIST_NEWLINE = 'consistNewline';
+export const MULTILINE_PROPERTY = 'multilineProperty';
 
 function getPropertyString(
   source: SourceCode,
@@ -53,7 +54,9 @@ function getPropertyString(
   if ((
     key.type !== 'Identifier' && key.type !== 'Literal'
   ) || (
-    value.type !== 'Identifier' && value.type !== 'AssignmentPattern'
+    value.type !== 'Identifier'
+    && value.type !== 'AssignmentPattern'
+    && value.type !== 'ObjectPattern'
   )) {
     return originalText;
   }
@@ -68,6 +71,10 @@ function getPropertyString(
     }
 
     return `${valueString}: ${value.name}${endString}`;
+  }
+
+  if (value.type === 'ObjectPattern') {
+    return `${valueString}: ${source.getText(value)}${endString}`;
   }
 
   if (
@@ -155,6 +162,7 @@ const rule: Rule.RuleModule = {
       [MUST_NOT_SPLIT]: `Object desctructuring lines must not be broken into multiple lines if there are {{${MUST_NOT_SPLIT}}} or less elements.`,
       [NO_BLANK_BETWEEN]: 'Object desctructuring lines cannot have blank line between them.',
       [CONSIST_NEWLINE]: 'Object desctructuring lines must be put on newlines',
+      [MULTILINE_PROPERTY]: 'Object desctructuring lines have multiline property must be put on newlines',
     },
   },
   create(ctx) {
@@ -179,6 +187,7 @@ const rule: Rule.RuleModule = {
         let multiLine = false;
         let inSameLine = false;
         let hasBlankBetween = false;
+        let hasMultilineProperty = false;
 
         for (let i = 0; i < properties.length - 1; i++) {
           hasRest ||= properties[i].type === 'RestElement';
@@ -189,9 +198,13 @@ const rule: Rule.RuleModule = {
             continue;
           }
 
-          if (nextLoc.start.line !== currenLoc.start.line) {
+          if (currenLoc.end.line !== currenLoc.start.line) {
+            hasMultilineProperty = true;
+          }
+
+          if (nextLoc.start.line !== currenLoc.end.line) {
             multiLine = true;
-          } else {
+          } else if (nextLoc.start.line === currenLoc.end.line) {
             inSameLine = true;
           }
 
@@ -203,7 +216,7 @@ const rule: Rule.RuleModule = {
 
           if (i === properties.length - 2) {
             hasRest ||= properties[i + 1].type === 'RestElement';
-            multiLine ||= nextLoc.end.line !== nextLoc.start.line;
+            hasMultilineProperty ||= nextLoc.end.line !== nextLoc.start.line;
           }
         }
 
@@ -221,6 +234,16 @@ const rule: Rule.RuleModule = {
         // line break is not included in lines
         const isLongText = (textLength + end - start) > maxLength;
         const hasManyItems = properties.length > maxCount;
+
+        // multiline property has the greatest weight
+        if (hasMultilineProperty && !multiLine) {
+          ctx.report({
+            node,
+            messageId: MULTILINE_PROPERTY,
+          });
+
+          return;
+        }
 
         // conditions that need wrap text
         if (hasManyItems || isLongText) {

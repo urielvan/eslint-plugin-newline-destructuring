@@ -1,7 +1,12 @@
 /* eslint-disable no-template-curly-in-string */
 import { RuleTester } from 'eslint';
 import newline, {
-  CONSIST_NEWLINE, MUST_NOT_SPLIT, MUST_SPLIT, MUST_SPLIT_TOO_LONG, NO_BLANK_BETWEEN,
+  CONSIST_NEWLINE,
+  MULTILINE_PROPERTY,
+  MUST_NOT_SPLIT,
+  MUST_SPLIT,
+  MUST_SPLIT_TOO_LONG,
+  NO_BLANK_BETWEEN,
 } from '@/newline';
 
 const runner = new RuleTester({
@@ -208,6 +213,30 @@ runner.run('option `maxLength` with others', newline, {
         },
       }],
       output: 'const {\nfooo,\nbarrrrr\n} = foo;',
+    },
+  ],
+});
+
+runner.run('nested ones', newline, {
+  valid: [
+    {
+      code: 'const {\nfoo,\nnest: {deepFoo,\ndeepBar}\n} = foo;',
+      options: [{ maxLength: 16 }],
+    },
+  ],
+  invalid: [
+    {
+      code: 'const {foo,nest: {deepFoo,\ndeepBar}} = foo;',
+      errors: [
+        { messageId: MULTILINE_PROPERTY },
+        { messageId: MUST_NOT_SPLIT },
+      ],
+      output: 'const {foo,nest: {deepFoo,deepBar}} = foo;',
+    },
+    {
+      code: 'const {foo,nest: {deepFoo,\ndeepBar,\ndeepBaz},\nbar} = foo;',
+      errors: [{ messageId: CONSIST_NEWLINE }],
+      output: 'const {\nfoo,\nnest: {deepFoo,\ndeepBar,\ndeepBaz},\nbar\n} = foo;',
     },
   ],
 });
