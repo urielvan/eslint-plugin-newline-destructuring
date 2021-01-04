@@ -48,19 +48,24 @@ function getPropertyString(
     endString += '\n';
   }
 
-  if (
-    key.type !== 'Identifier'
-    || (value.type !== 'Identifier' && value.type !== 'AssignmentPattern')
-  ) {
+  if ((
+    key.type !== 'Identifier' && key.type !== 'Literal'
+  ) || (
+    value.type !== 'Identifier' && value.type !== 'AssignmentPattern'
+  )) {
     return originalText;
   }
 
+  const name = key.type === 'Identifier'
+    ? key.name
+    : key.raw ?? '';
+
   if (item.shorthand) {
-    return key.name + endString;
+    return name + endString;
   }
 
   if (value.type === 'Identifier') {
-    return `${key.name}: ${value.name}${endString}`;
+    return `${name}: ${value.name}${endString}`;
   }
 
   if (
@@ -86,7 +91,7 @@ function getPropertyString(
     valueString += context.getSourceCode().getText(value.right);
   }
 
-  return `${key.name}: ${valueString}${endString}`;
+  return `${name}: ${valueString}${endString}`;
 }
 
 function getFixer(context: Rule.RuleContext, node: Node, multiLine = true) {
