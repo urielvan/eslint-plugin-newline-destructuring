@@ -1,5 +1,7 @@
-import newline from "./newline";
+import newline from './newline';
 
-export default {
-  newline,
+module.exports = {
+  rules: {
+    newline,
+  },
 };
