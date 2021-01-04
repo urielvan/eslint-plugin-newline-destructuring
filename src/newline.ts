@@ -77,18 +77,13 @@ function getPropertyString(
     return `${valueString}: ${source.getText(value)}${endString}`;
   }
 
-  if (
-    value.left.type !== 'Identifier'
-    || (
-      value.right.type !== 'Literal'
-      && value.right.type !== 'TemplateLiteral'
-      && value.right.type !== 'Identifier'
-    )
-  ) {
+  if (value.left.type !== 'Identifier' && value.left.type !== 'ObjectPattern') {
     return originalText;
   }
 
-  if (!item.shorthand) {
+  if (value.left.type === 'ObjectPattern') {
+    valueString += `: ${source.getText(value.left)}`;
+  } else if (!item.shorthand) {
     valueString += `: ${value.left.name}`;
   }
 

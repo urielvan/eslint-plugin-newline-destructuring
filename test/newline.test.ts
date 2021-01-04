@@ -234,6 +234,11 @@ runner.run('nested ones', newline, {
       output: 'const {foo,nest: {deepFoo,deepBar}} = foo;',
     },
     {
+      code: 'const { nest: { deepFoo } = {},\nfoo } = foo;',
+      errors: [{ messageId: MUST_NOT_SPLIT }],
+      output: 'const {nest: { deepFoo } = {},foo} = foo;',
+    },
+    {
       code: 'const {foo,nest: {deepFoo,\ndeepBar,\ndeepBaz},\nbar} = foo;',
       errors: [{ messageId: CONSIST_NEWLINE }],
       output: 'const {\nfoo,\nnest: {deepFoo,\ndeepBar,\ndeepBaz},\nbar\n} = foo;',
