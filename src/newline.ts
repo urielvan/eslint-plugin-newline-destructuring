@@ -1,6 +1,8 @@
-import { Rule } from 'eslint';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { TSESTree } from '@typescript-eslint/typescript-estree';
+import { Rule, SourceCode } from 'eslint';
 // eslint-disable-next-line import/no-unresolved
-import { SourceLocation } from 'estree';
+import ESTree from 'estree';
 
 interface Option {
   items?: number;
@@ -9,7 +11,7 @@ interface Option {
 }
 
 type ElementOf<T> = T extends Array<infer U> ? U : never;
-type NullableLocation = SourceLocation | null | undefined;
+type NullableLocation = ESTree.SourceLocation | null | undefined;
 type Node = Parameters<NonNullable<Rule.NodeListener['ObjectPattern']>>[0];
 type Item = ElementOf<Node['properties']>;
 
@@ -24,12 +26,12 @@ export const NO_BLANK_BETWEEN = 'noBlankBetween';
 export const CONSIST_NEWLINE = 'consistNewline';
 
 function getPropertyString(
-  context: Rule.RuleContext,
+  source: SourceCode,
   item: Item,
   multiLine: boolean,
   isLast = false,
 ) {
-  const originalText = context.getSourceCode().getText(item);
+  const originalText = source.getText(item);
 
   if (item.type === 'RestElement') {
     if (item.argument.type === 'Identifier') {
@@ -88,18 +90,18 @@ function getPropertyString(
   } else if (value.right.type === 'Literal') {
     valueString += value.right.raw ?? '';
   } else {
-    valueString += context.getSourceCode().getText(value.right);
+    valueString += source.getText(value.right);
   }
 
   return `${name}: ${valueString}${endString}`;
 }
 
-function getFixer(context: Rule.RuleContext, node: Node, multiLine = true) {
+function getFixer(source: SourceCode, node: Node, multiLine = true) {
   return (fixer: Rule.RuleFixer) => {
     const { properties } = node;
     const lastIndex = properties.length - 1;
     const newValues = node.properties.map(
-      (item, i) => getPropertyString(context, item, multiLine, i === lastIndex),
+      (item, i) => getPropertyString(source, item, multiLine, i === lastIndex),
     );
     let newString = newValues.join('');
 
@@ -107,7 +109,15 @@ function getFixer(context: Rule.RuleContext, node: Node, multiLine = true) {
       newString = `\n${newString}\n`;
     }
 
-    return fixer.replaceText(node, `{${newString}}`);
+    newString = `{${newString}}`;
+
+    const { typeAnnotation } = node as TSESTree.ObjectPattern;
+
+    if (typeAnnotation) {
+      newString += source.getText(typeAnnotation as unknown as ESTree.Node);
+    }
+
+    return fixer.replaceText(node, newString);
   };
 }
 
@@ -146,6 +156,7 @@ const rule: Rule.RuleModule = {
     },
   },
   create(ctx) {
+    const source = ctx.getSourceCode();
     const {
       items = MAX_COUNT,
       itemsWithRest = MAX_REST_COUNT,
@@ -222,7 +233,7 @@ const rule: Rule.RuleModule = {
                 : {
                   [MUST_SPLIT_TOO_LONG]: maxLength.toString(),
                 },
-              fix: getFixer(ctx, node),
+              fix: getFixer(source, node),
             });
 
             return;
@@ -232,7 +243,7 @@ const rule: Rule.RuleModule = {
             ctx.report({
               node,
               messageId: CONSIST_NEWLINE,
-              fix: getFixer(ctx, node),
+              fix: getFixer(source, node),
             });
           }
 
@@ -240,7 +251,7 @@ const rule: Rule.RuleModule = {
             ctx.report({
               node,
               messageId: NO_BLANK_BETWEEN,
-              fix: getFixer(ctx, node),
+              fix: getFixer(source, node),
             });
           }
         } else if (multiLine) {
@@ -250,7 +261,7 @@ const rule: Rule.RuleModule = {
             data: {
               [MUST_NOT_SPLIT]: maxCount.toString(),
             },
-            fix: getFixer(ctx, node, false),
+            fix: getFixer(source, node, false),
           });
         }
       },
