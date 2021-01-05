@@ -219,7 +219,7 @@ const rule: Rule.RuleModule = {
         const start = node.loc?.start.line ?? NaN;
         const end = node.loc?.end.line ?? NaN;
         const lines = ctx.getSourceCode().getLines().slice(start - 1, end);
-        const textLength = lines.map(line => line.trimEnd()).join('').length;
+        const textLength = lines.map(line => line.trim()).join('').length;
 
         // loc is null/undefined
         if (Number.isNaN(start) && Number.isNaN(end)) {

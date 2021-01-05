@@ -74,6 +74,11 @@ runner.run('default options', newline, {
       output: 'const {a,b} = foo;',
     },
     {
+      code: 'const { a, \n\n    b } = foo;',
+      errors: [{ messageId: MUST_NOT_SPLIT }],
+      output: 'const {a,b} = foo;',
+    },
+    {
       code: "const { 'foo': xx,\n'bar': yy } = foo;",
       errors: [{ messageId: MUST_NOT_SPLIT }],
       output: "const {'foo': xx,'bar': yy} = foo;",
