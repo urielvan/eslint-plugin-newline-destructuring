@@ -274,7 +274,7 @@ const rule: Rule.RuleModule = {
               fix: getFixer(source, node),
             });
           }
-        } else if (multiLine) {
+        } else if (multiLine && !hasMultilineProperty) {
           ctx.report({
             node,
             messageId: MUST_NOT_SPLIT,

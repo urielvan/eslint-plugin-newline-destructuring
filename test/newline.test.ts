@@ -228,6 +228,7 @@ runner.run('nested ones', newline, {
       code: 'const {\nfoo,\nnest: {deepFoo,\ndeepBar}\n} = foo;',
       options: [{ maxLength: 16 }],
     },
+    'const {\nfoo,\nbar: {\nxx,\nxxx: {\nprop1,\nprop2,\nprop3,\n},\n},\n} = foo;',
   ],
   invalid: [
     {
