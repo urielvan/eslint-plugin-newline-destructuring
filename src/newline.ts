@@ -153,7 +153,7 @@ const rule: Rule.RuleModule = {
     },
     messages: {
       [MUST_SPLIT]: `Object desctructuring lines must be broken into multiple lines if there are more than {{${MUST_SPLIT}}} properties`,
-      [MUST_SPLIT_TOO_LONG]: `Object desctructuring lines must be broken into multiple lines if the line is longer than {${MUST_SPLIT_TOO_LONG}}`,
+      [MUST_SPLIT_TOO_LONG]: `Object desctructuring lines must be broken into multiple lines if the line is longer than {{${MUST_SPLIT_TOO_LONG}}}`,
       [MUST_NOT_SPLIT]: `Object desctructuring lines must not be broken into multiple lines if there are {{${MUST_NOT_SPLIT}}} or less elements.`,
       [NO_BLANK_BETWEEN]: 'Object desctructuring lines cannot have blank line between them.',
       [CONSIST_NEWLINE]: 'Object desctructuring lines must be put on newlines',
