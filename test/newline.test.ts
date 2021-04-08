@@ -21,10 +21,22 @@ const runner = new RuleTester({
 });
 
 runner.run('no blank line between', newline, {
-  valid: [],
+  valid: [
+    'const {\na,\n// comments\nb,\nc,\n} = foo;',
+    'const {\na,\n// comments\n// comments\nb,\nc,\n} = foo;',
+    'const {\na,\n/*\n* comments* comments\n*/\nb,\nc,\n} = foo;',
+  ],
   invalid: [
     {
       code: 'const { a, \n\nb, c } = foo;',
+      errors: [
+        { messageId: CONSIST_NEWLINE },
+        { messageId: NO_BLANK_BETWEEN },
+      ],
+      output: 'const {\na,\nb,\nc\n} = foo;',
+    },
+    {
+      code: 'const { a, \n// comments\n\nb, c } = foo;',
       errors: [
         { messageId: CONSIST_NEWLINE },
         { messageId: NO_BLANK_BETWEEN },

@@ -183,6 +183,16 @@ const rule: Rule.RuleModule = {
         let inSameLine = false;
         let hasBlankBetween = false;
         let hasMultilineProperty = false;
+        const commentLines: number[] = [];
+
+        source.getCommentsInside(node)
+          .forEach(comment => {
+            if (comment.loc) {
+              for (let i = comment.loc.start.line; i <= comment.loc.end.line; i++) {
+                commentLines.push(i);
+              }
+            }
+          });
 
         for (let i = 0; i < properties.length - 1; i++) {
           hasRest ||= properties[i].type === 'RestElement';
@@ -204,7 +214,15 @@ const rule: Rule.RuleModule = {
           }
 
           if (currenLoc.end.line + 1 < nextLoc.start.line) {
-            hasBlankBetween = true;
+            if (!hasBlankBetween) {
+              for (let j = currenLoc.end.line + 1; j < nextLoc.start.line; j++) {
+                if (!commentLines.includes(j)) {
+                  hasBlankBetween = true;
+
+                  break;
+                }
+              }
+            }
 
             continue;
           }
@@ -247,12 +265,8 @@ const rule: Rule.RuleModule = {
               node,
               messageId: hasManyItems ? MUST_SPLIT : MUST_SPLIT_TOO_LONG,
               data: hasManyItems
-                ? {
-                  [MUST_SPLIT]: maxCount.toString(),
-                }
-                : {
-                  [MUST_SPLIT_TOO_LONG]: maxLength.toString(),
-                },
+                ? { [MUST_SPLIT]: maxCount.toString() }
+                : { [MUST_SPLIT_TOO_LONG]: maxLength.toString() },
               fix: getFixer(source, node),
             });
 
