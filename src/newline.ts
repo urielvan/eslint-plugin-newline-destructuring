@@ -26,6 +26,12 @@ export const NO_BLANK_BETWEEN = 'noBlankBetween';
 export const CONSIST_NEWLINE = 'consistNewline';
 export const MULTILINE_PROPERTY = 'multilineProperty';
 
+function isRestElement(item: Item): item is ESTree.RestElement {
+  return item.type === 'RestElement'
+    // for babel-eslint compatibility
+    || item.type === 'ExperimentalRestProperty' as unknown;
+}
+
 function getPropertyString(
   source: SourceCode,
   item: Item,
@@ -34,7 +40,7 @@ function getPropertyString(
 ) {
   const originalText = source.getText(item);
 
-  if (item.type === 'RestElement') {
+  if (isRestElement(item)) {
     if (item.argument.type === 'Identifier') {
       return `...${item.argument.name}`;
     }
