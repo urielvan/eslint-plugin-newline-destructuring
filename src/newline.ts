@@ -1,13 +1,15 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { TSESTree } from '@typescript-eslint/typescript-estree';
-import { Rule, SourceCode } from 'eslint';
+import { AST, Rule, SourceCode } from 'eslint';
 // eslint-disable-next-line import/no-unresolved
 import ESTree from 'estree';
+import Token = AST.Token;
 
 interface Option {
   items?: number;
   itemsWithRest?: number;
   maxLength?: number;
+  consistent?: boolean;
 }
 
 type ElementOf<T> = T extends Array<infer U> ? U : never;
@@ -18,6 +20,7 @@ type Item = ElementOf<Node['properties']>;
 const MAX_COUNT = 2;
 const MAX_REST_COUNT = 1;
 const MAX_LENGTH = Infinity;
+const CONSISTENT = false;
 
 export const MUST_SPLIT = 'mustSplit';
 export const MUST_NOT_SPLIT = 'mustNotSplit';
@@ -30,6 +33,10 @@ function isRestElement(item: Item): item is ESTree.RestElement {
   return item.type === 'RestElement'
     // for babel-eslint compatibility
     || item.type === 'ExperimentalRestProperty' as unknown;
+}
+
+function isSameLine(first: Token, last: Token): boolean {
+  return first.loc.end.line === last.loc.start.line;
 }
 
 function getPropertyString(
@@ -154,6 +161,9 @@ const rule: Rule.RuleModule = {
             type: 'number',
             minimum: 4, // `{}=x`, x stands for a variable
           },
+          consistent: {
+            type: 'boolean',
+          },
         },
       },
     },
@@ -172,6 +182,7 @@ const rule: Rule.RuleModule = {
       items = MAX_COUNT,
       itemsWithRest = MAX_REST_COUNT,
       maxLength = MAX_LENGTH,
+      consistent = CONSISTENT,
     } = (ctx.options[0] ?? {}) as Option;
 
     return {
@@ -190,6 +201,8 @@ const rule: Rule.RuleModule = {
         let hasBlankBetween = false;
         let hasMultilineProperty = false;
         const commentLines: number[] = [];
+        const openBrace = source.getFirstToken(node, token => token.value === '{') as Token;
+        const closeBrace = source.getLastToken(node, token => token.value === '}') as Token;
 
         source.getCommentsInside(node)
           .forEach(comment => {
@@ -294,7 +307,13 @@ const rule: Rule.RuleModule = {
               fix: getFixer(source, node),
             });
           }
-        } else if (multiLine && !hasMultilineProperty) {
+        } else if (consistent && inSameLine && !isSameLine(openBrace, closeBrace)) {
+          ctx.report({
+            node,
+            messageId: CONSIST_NEWLINE,
+            fix: getFixer(source, node, false),
+          });
+        } else if (!consistent && multiLine && !hasMultilineProperty) {
           ctx.report({
             node,
             messageId: MUST_NOT_SPLIT,
