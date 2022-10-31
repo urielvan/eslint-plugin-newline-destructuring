@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "jest --watch --onlyChanged",
+    "lint": "eslint ./src ./test",
     "test": "jest"
   },
   "files": [
