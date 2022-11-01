@@ -234,6 +234,27 @@ runner.run('option `maxLength` with others', newline, {
   ],
 });
 
+runner.run('option `consistent`', newline, {
+  valid: [
+    {
+      code: 'const { a, b } = foo;',
+      options: [{ consistent: true }],
+    },
+    {
+      code: 'const {\na,\nb\n} = foo;',
+      options: [{ consistent: true }],
+    },
+  ],
+  invalid: [
+    {
+      code: 'const {\na, b,\n} = foo;',
+      options: [{ consistent: true }],
+      errors: [{ messageId: CONSIST_NEWLINE }],
+      output: 'const {a,b} = foo;',
+    },
+  ],
+});
+
 runner.run('nested ones', newline, {
   valid: [
     {
