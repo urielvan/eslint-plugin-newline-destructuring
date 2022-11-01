@@ -4,8 +4,10 @@
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
+    "build": "tsc --project tsconfig.build.json",
     "dev": "jest --watch --onlyChanged",
     "lint": "eslint ./src ./test",
+    "prepack": "tsc --project tsconfig.build.json",
     "test": "jest"
   },
   "files": [
