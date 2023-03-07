@@ -333,13 +333,7 @@ const rule: Rule.RuleModule = {
         }
 
         if (!consistent && multiLine && !hasMultilineProperty) {
-          if (allowAllPropertiesOnSameLine) {
-            ctx.report({
-              node,
-              messageId: CONSIST_NEWLINE,
-              fix: getFixer(source, node),
-            });
-          } else {
+          if (!allowAllPropertiesOnSameLine) {
             ctx.report({
               node,
               messageId: MUST_NOT_SPLIT,
@@ -347,6 +341,12 @@ const rule: Rule.RuleModule = {
                 [MUST_NOT_SPLIT]: maxCount.toString(),
               },
               fix: getFixer(source, node, false),
+            });
+          } else if (inSameLine) {
+            ctx.report({
+              node,
+              messageId: CONSIST_NEWLINE,
+              fix: getFixer(source, node),
             });
           }
         }

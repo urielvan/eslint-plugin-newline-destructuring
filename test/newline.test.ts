@@ -271,6 +271,13 @@ runner.run('option `allowAllPropertiesOnSameLine`', newline, {
       options: [{ allowAllPropertiesOnSameLine: true }],
     },
     {
+      code: 'const {\na,\nb,\nc\n} = foo;',
+      options: [{
+        items: 3,
+        allowAllPropertiesOnSameLine: true,
+      }],
+    },
+    {
       code: 'const {\na, b, c\n} = foo;',
       options: [{
         items: 3,
