@@ -31,3 +31,13 @@ The rule accepts an option object with the following properties:
 - `maxLength` [number] (default: `Infinity`) - Specifies the maximum length for source code lines in your project, the plugin will split long destructuring lines even if they contains properties less than value in `items` or `itemsWithRest`
 
 - `consistent` [boolean] (default: false) - If there are less than the threshold items, allow new lines consistent with whether the curly braces are on their own lines or not.
+
+- `allowAllPropertiesOnSameLine` [boolean] (default: false) - If there are less than the threshold items, allow all properties to be on the same line. But one like
+
+  ``` js
+  const {
+    a,b,
+    c
+  } = obj
+  ```
+  will be split into multiple lines

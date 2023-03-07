@@ -252,6 +252,52 @@ runner.run('option `consistent`', newline, {
       errors: [{ messageId: CONSIST_NEWLINE }],
       output: 'const {a,b} = foo;',
     },
+    {
+      code: 'const {a,\nb, c} = foo;',
+      options: [{
+        items: 3,
+        consistent: true,
+      }],
+      errors: [{ messageId: CONSIST_NEWLINE }],
+      output: 'const {a,b,c} = foo;',
+    },
+  ],
+});
+
+runner.run('option `allowAllPropertiesOnSameLine`', newline, {
+  valid: [
+    {
+      code: 'const { a, b } = foo;',
+      options: [{ allowAllPropertiesOnSameLine: true }],
+    },
+    {
+      code: 'const {\na, b, c\n} = foo;',
+      options: [{
+        items: 3,
+        consistent: true,
+        allowAllPropertiesOnSameLine: true,
+      }],
+    },
+  ],
+  invalid: [
+    {
+      code: 'const {\na,\nb, c\n} = foo;',
+      options: [{
+        items: 3,
+        allowAllPropertiesOnSameLine: true,
+      }],
+      errors: [{ messageId: CONSIST_NEWLINE }],
+      output: 'const {\na,\nb,\nc\n} = foo;',
+    },
+    {
+      code: 'const { a,\nb, c } = foo;',
+      options: [{
+        items: 3,
+        allowAllPropertiesOnSameLine: true,
+      }],
+      errors: [{ messageId: CONSIST_NEWLINE }],
+      output: 'const {\na,\nb,\nc\n} = foo;',
+    },
   ],
 });
 

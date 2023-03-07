@@ -10,6 +10,7 @@ interface Option {
   itemsWithRest?: number;
   maxLength?: number;
   consistent?: boolean;
+  allowAllPropertiesOnSameLine?: boolean;
 }
 
 type ElementOf<T> = T extends Array<infer U> ? U : never;
@@ -21,6 +22,7 @@ const MAX_COUNT = 2;
 const MAX_REST_COUNT = 1;
 const MAX_LENGTH = Infinity;
 const CONSISTENT = false;
+const ALLOW_ALL_PROPERTIES_ON_SAME_LINE = false;
 
 export const MUST_SPLIT = 'mustSplit';
 export const MUST_NOT_SPLIT = 'mustNotSplit';
@@ -164,6 +166,9 @@ const rule: Rule.RuleModule = {
           consistent: {
             type: 'boolean',
           },
+          allowAllPropertiesOnSameLine: {
+            type: 'boolean',
+          },
         },
       },
     },
@@ -183,6 +188,7 @@ const rule: Rule.RuleModule = {
       itemsWithRest = MAX_REST_COUNT,
       maxLength = MAX_LENGTH,
       consistent = CONSISTENT,
+      allowAllPropertiesOnSameLine = ALLOW_ALL_PROPERTIES_ON_SAME_LINE,
     } = (ctx.options[0] ?? {}) as Option;
 
     return {
@@ -307,21 +313,42 @@ const rule: Rule.RuleModule = {
               fix: getFixer(source, node),
             });
           }
-        } else if (consistent && inSameLine && !isSameLine(openBrace, closeBrace)) {
+
+          return;
+        }
+
+        if (
+          consistent
+          && inSameLine
+          && !isSameLine(openBrace, closeBrace)
+          && !allowAllPropertiesOnSameLine
+        ) {
           ctx.report({
             node,
             messageId: CONSIST_NEWLINE,
             fix: getFixer(source, node, false),
           });
-        } else if (!consistent && multiLine && !hasMultilineProperty) {
-          ctx.report({
-            node,
-            messageId: MUST_NOT_SPLIT,
-            data: {
-              [MUST_NOT_SPLIT]: maxCount.toString(),
-            },
-            fix: getFixer(source, node, false),
-          });
+
+          return;
+        }
+
+        if (!consistent && multiLine && !hasMultilineProperty) {
+          if (allowAllPropertiesOnSameLine) {
+            ctx.report({
+              node,
+              messageId: CONSIST_NEWLINE,
+              fix: getFixer(source, node),
+            });
+          } else {
+            ctx.report({
+              node,
+              messageId: MUST_NOT_SPLIT,
+              data: {
+                [MUST_NOT_SPLIT]: maxCount.toString(),
+              },
+              fix: getFixer(source, node, false),
+            });
+          }
         }
       },
     };
